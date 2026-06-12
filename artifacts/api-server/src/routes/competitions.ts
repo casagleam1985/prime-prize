@@ -1,5 +1,6 @@
 import { Router, type IRouter } from "express";
 import { eq, desc, sql } from "drizzle-orm";
+import { getAuth } from "@clerk/express";
 import { db, competitionsTable, ticketPurchasesTable } from "@workspace/db";
 import {
   ListCompetitionsQueryParams,
@@ -105,6 +106,11 @@ router.post("/competitions/:id/tickets", async (req, res): Promise<void> => {
     .from(competitionsTable)
     .where(eq(competitionsTable.id, params.data.id));
 
+  if (competition && Number(competition.ticketPrice) > 0.99) {
+    res.status(400).json({ error: "Ticket price exceeds the maximum allowed price of 99p" });
+    return;
+  }
+
   if (!competition) {
     res.status(404).json({ error: "Competition not found" });
     return;
@@ -128,6 +134,9 @@ router.post("/competitions/:id/tickets", async (req, res): Promise<void> => {
 
   const totalPrice = Number(competition.ticketPrice) * body.data.quantity;
 
+  const auth = getAuth(req);
+  const userId = auth?.userId ?? null;
+
   const [purchase] = await db
     .insert(ticketPurchasesTable)
     .values({
@@ -137,6 +146,7 @@ router.post("/competitions/:id/tickets", async (req, res): Promise<void> => {
       ticketNumbers,
       email: body.data.email,
       name: body.data.name,
+      userId,
     })
     .returning();
 

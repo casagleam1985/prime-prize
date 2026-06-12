@@ -1,13 +1,15 @@
-import { useGetCompetition, getGetCompetitionQueryKey, usePurchaseTickets } from "@workspace/api-client-react";
+import { useGetCompetition, getGetCompetitionQueryKey, usePurchaseTickets, useGetMyTickets, getGetMyTicketsQueryKey } from "@workspace/api-client-react";
 import { useParams } from "wouter";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { useUser } from "@clerk/react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Timer, Minus, Plus, Ticket, ArrowRight, ShieldCheck } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Timer, Minus, Plus, Ticket, ArrowRight, ShieldCheck, CheckCircle2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function CompetitionDetail() {
@@ -15,26 +17,34 @@ export default function CompetitionDetail() {
   const compId = Number(id);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { isSignedIn, user } = useUser();
 
   const { data: comp, isLoading } = useGetCompetition(compId, {
     query: { enabled: !!compId, queryKey: getGetCompetitionQueryKey(compId) }
   });
 
+  const { data: myTickets } = useGetMyTickets({
+    query: { enabled: !!isSignedIn, queryKey: getGetMyTicketsQueryKey() }
+  });
+
+  const alreadyEntered = myTickets?.some((t) => t.competitionId === compId);
+  const myTicketsForThis = myTickets?.filter((t) => t.competitionId === compId) ?? [];
+  const myTotalTickets = myTicketsForThis.reduce((sum, t) => sum + t.quantity, 0);
+
   const [quantity, setQuantity] = useState(1);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [name, setName] = useState(user?.fullName ?? "");
+  const [email, setEmail] = useState(user?.primaryEmailAddress?.emailAddress ?? "");
 
   const purchaseMutation = usePurchaseTickets({
     mutation: {
       onSuccess: () => {
         toast({
           title: "Tickets Purchased!",
-          description: "Good luck! Your ticket numbers have been sent to your email.",
+          description: "Good luck! Your ticket numbers have been saved to your account.",
         });
         queryClient.invalidateQueries({ queryKey: getGetCompetitionQueryKey(compId) });
+        queryClient.invalidateQueries({ queryKey: getGetMyTicketsQueryKey() });
         setQuantity(1);
-        setName("");
-        setEmail("");
       },
       onError: (error) => {
         toast({
@@ -94,10 +104,19 @@ export default function CompetitionDetail() {
                 £{comp.ticketPrice.toFixed(2)} <span className="text-sm font-normal">/ticket</span>
               </div>
             </div>
+            {alreadyEntered && (
+              <div className="absolute top-4 right-4 z-10">
+                <Badge className="bg-green-500 text-white gap-1.5 py-1.5 px-3 text-sm font-semibold shadow-lg">
+                  <CheckCircle2 className="h-4 w-4" />
+                  Already Entered
+                </Badge>
+              </div>
+            )}
             <img 
-              src={comp.imageUrl || "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&q=80&w=1000"} 
+              src={comp.imageUrl || "/api/storage/public-objects/prizes/fallback-prize.jpg"} 
               alt={comp.title}
               className="w-full h-[400px] lg:h-full object-cover"
+              onError={(e) => { (e.target as HTMLImageElement).src = "/api/storage/public-objects/prizes/fallback-prize.jpg"; }}
             />
           </div>
 
@@ -114,6 +133,17 @@ export default function CompetitionDetail() {
             <p className="text-lg text-muted-foreground mb-8">
               {comp.description}
             </p>
+
+            {/* "Already entered" info for signed-in users */}
+            {alreadyEntered && myTotalTickets > 0 && (
+              <div className="bg-green-50 border border-green-200 rounded-2xl p-4 mb-6 flex items-center gap-3">
+                <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
+                <div>
+                  <p className="font-semibold text-green-800 text-sm">You have {myTotalTickets} ticket{myTotalTickets !== 1 ? "s" : ""} in this draw</p>
+                  <p className="text-green-700 text-xs">Good luck! You can buy more tickets below.</p>
+                </div>
+              </div>
+            )}
 
             <div className="bg-secondary/5 rounded-2xl p-6 mb-8">
               <div className="flex justify-between text-sm font-medium mb-2">

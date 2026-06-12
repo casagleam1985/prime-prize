@@ -17,6 +17,8 @@ tags:
     description: Draw results operations
   - name: winners
     description: Winners operations
+  - name: Storage
+    description: Object storage upload and serving endpoints.
 paths:
   /healthz:
     get:
@@ -163,6 +165,50 @@ paths:
                 items:
                   $ref: "#/components/schemas/DrawResult"
 
+  /storage/public-objects/{filePath}:
+    get:
+      tags: [Storage]
+      operationId: getPublicObject
+      summary: Serve a public asset from PUBLIC_OBJECT_SEARCH_PATHS
+      parameters:
+        - name: filePath
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Object content streamed.
+          content:
+            '*/*':
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: File not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+  /account/tickets:
+    get:
+      operationId: getMyTickets
+      tags: [tickets]
+      summary: Get all ticket purchases for the authenticated user
+      security:
+        - clerkAuth: []
+      responses:
+        "200":
+          description: User's ticket purchases
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MyTicket"
+        "401":
+          description: Unauthorized
+
   /winners:
     get:
       operationId: listWinners
@@ -185,6 +231,10 @@ paths:
                   $ref: "#/components/schemas/Winner"
 
 components:
+  securitySchemes:
+    clerkAuth:
+      type: http
+      scheme: bearer
   schemas:
     HealthStatus:
       type: object
@@ -343,6 +393,49 @@ components:
           type: ["string", "null"]
         testimonial:
           type: ["string", "null"]
+
+    MyTicket:
+      type: object
+      required:
+        - id
+        - competitionId
+        - competitionTitle
+        - competitionStatus
+        - competitionImageUrl
+        - quantity
+        - totalPrice
+        - ticketNumbers
+        - createdAt
+      properties:
+        id:
+          type: integer
+        competitionId:
+          type: integer
+        competitionTitle:
+          type: string
+        competitionStatus:
+          type: string
+        competitionImageUrl:
+          type: string
+        drawDate:
+          type: string
+        quantity:
+          type: integer
+        totalPrice:
+          type: number
+        ticketNumbers:
+          type: array
+          items:
+            type: integer
+        createdAt:
+          type: string
+
+    ErrorEnvelope:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
 
     PlatformStats:
       type: object

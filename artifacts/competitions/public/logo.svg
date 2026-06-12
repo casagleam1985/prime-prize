@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 48" fill="none">
+  <g transform="translate(4, 4)">
+    <rect width="40" height="40" rx="10" fill="hsl(12, 90%, 55%)"/>
+    <path d="M20 8L23.5 17H33L25.5 22.5L28.5 32L20 26.5L11.5 32L14.5 22.5L7 17H16.5L20 8Z" fill="white"/>
+  </g>
+  <text x="54" y="32" font-family="'Outfit', sans-serif" font-weight="700" font-size="22" fill="hsl(222, 80%, 20%)">Prime Prize</text>
+</svg>

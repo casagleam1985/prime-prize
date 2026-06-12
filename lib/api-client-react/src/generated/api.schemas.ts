@@ -79,6 +79,23 @@ export interface Winner {
   testimonial?: string | null;
 }
 
+export interface MyTicket {
+  id: number;
+  competitionId: number;
+  competitionTitle: string;
+  competitionStatus: string;
+  competitionImageUrl: string;
+  drawDate?: string;
+  quantity: number;
+  totalPrice: number;
+  ticketNumbers: number[];
+  createdAt: string;
+}
+
+export interface ErrorEnvelope {
+  error: string;
+}
+
 export interface PlatformStats {
   totalWinners: number;
   totalPrizesAwarded: number;

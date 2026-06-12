@@ -10,6 +10,7 @@ export const ticketPurchasesTable = pgTable("ticket_purchases", {
   ticketNumbers: jsonb("ticket_numbers").notNull().$type<number[]>(),
   email: text("email").notNull(),
   name: text("name").notNull(),
+  userId: text("user_id"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

@@ -5,7 +5,15 @@
   "type": "module",
   "scripts": {
     "hello": "tsx ./src/hello.ts",
+    "seed:competitions": "tsx ./src/seed-competitions.ts",
+    "upload:prize-images": "tsx ./src/upload-prize-images.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@workspace/db": "workspace:*",
+    "@google-cloud/storage": "^7.16.0",
+    "drizzle-orm": "catalog:",
+    "google-auth-library": "^9.15.1"
   },
   "devDependencies": {
     "@types/node": "catalog:",

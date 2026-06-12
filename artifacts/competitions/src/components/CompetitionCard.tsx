@@ -27,8 +27,9 @@ export function CompetitionCard({ competition, featured }: Props) {
         </div>
         
         <img 
-          src={competition.imageUrl || "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?auto=format&fit=crop&q=80&w=600"} 
+          src={competition.imageUrl || "/api/storage/public-objects/prizes/fallback-prize.jpg"} 
           alt={competition.title}
+          onError={(e) => { (e.target as HTMLImageElement).src = "/api/storage/public-objects/prizes/fallback-prize.jpg"; }}
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />

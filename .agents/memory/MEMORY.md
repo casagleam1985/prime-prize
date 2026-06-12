@@ -1,0 +1,1 @@
+- [Clerk Auth Setup](clerk-auth-setup.md) — Clerk provisioned (Replit-managed); Clerk proxy middleware wired before body parsers in api-server; competitions frontend uses shadcn theme with cssLayerName and @layer declaration in index.css.

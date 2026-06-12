@@ -150,6 +150,32 @@ export const ListDrawResultsResponse = zod.array(ListDrawResultsResponseItem)
 
 
 /**
+ * @summary Serve a public asset from PUBLIC_OBJECT_SEARCH_PATHS
+ */
+export const GetPublicObjectParams = zod.object({
+  "filePath": zod.coerce.string()
+})
+
+
+/**
+ * @summary Get all ticket purchases for the authenticated user
+ */
+export const GetMyTicketsResponseItem = zod.object({
+  "id": zod.number(),
+  "competitionId": zod.number(),
+  "competitionTitle": zod.string(),
+  "competitionStatus": zod.string(),
+  "competitionImageUrl": zod.string(),
+  "drawDate": zod.string().optional(),
+  "quantity": zod.number(),
+  "totalPrice": zod.number(),
+  "ticketNumbers": zod.array(zod.number()),
+  "createdAt": zod.string()
+})
+export const GetMyTicketsResponse = zod.array(GetMyTicketsResponseItem)
+
+
+/**
  * @summary List recent winners
  */
 export const listWinnersQueryLimitDefault = 10;
